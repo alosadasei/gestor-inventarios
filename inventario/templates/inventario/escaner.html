@@ -1,0 +1,50 @@
+{% extends "inventario/base.html" %}
+{# Pantalla principal: campo de escaneo continuo para localizar un bien por su código. #}
+{% block titulo %}Escáner{% endblock %}
+{% block nav_escaner %}active{% endblock %}
+{% block titulo_pagina %}Escanear bien{% endblock %}
+{% block contenido %}
+<div class="app-card" style="max-width: 560px;">
+    <p style="color:var(--app-muted); margin-top:0;">
+        Apunta la pistola y lee la etiqueta. El campo se rellena y busca automáticamente.
+    </p>
+    <form method="post" action="{% url 'inventario:escaner' %}">
+        {% csrf_token %}
+        <input
+            type="text"
+            name="codigo"
+            id="campo-codigo"
+            class="campo-escaner"
+            autofocus
+            autocomplete="off"
+        >
+    </form>
+    {% if error %}
+        <div class="django-message error" style="margin-top:1rem;">
+            <i class="bi bi-x-circle-fill"></i> {{ error }}
+        </div>
+    {% endif %}
+</div>
+
+<div class="d-flex gap-2 flex-wrap mt-3">
+    <a class="btn-app-ghost" href="{% url 'inventario:alta_bien' %}"><i class="bi bi-plus-square"></i> Dar de alta un bien</a>
+    <a class="btn-app-ghost" href="{% url 'inventario:etiquetas_lote_form' %}"><i class="bi bi-tags"></i> Imprimir etiquetas</a>
+    {% if es_administrador %}
+        <a class="btn-app-ghost" href="{% url 'inventario:bajas_pendientes' %}"><i class="bi bi-clipboard-check"></i> Bajas pendientes</a>
+    {% endif %}
+</div>
+
+<script>
+    // Las pistolas de código de barras emulan un teclado y terminan la
+    // lectura con un "Enter": basta con mantener el foco en el campo y
+    // enviar el formulario en cuanto llega ese salto de línea.
+    const campo = document.getElementById('campo-codigo');
+    campo.focus();
+    document.addEventListener('click', () => campo.focus());
+    campo.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Enter') {
+            evento.target.form.submit();
+        }
+    });
+</script>
+{% endblock %}

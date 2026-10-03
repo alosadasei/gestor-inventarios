@@ -1,0 +1,10 @@
+Django==5.2.*
+python-dotenv==1.*
+gunicorn==23.*
+whitenoise==6.*
+openpyxl==3.1.*
+django-import-export==4.4.*
+qrcode==8.2
+python-barcode==0.16.1
+Pillow==12.*
+reportlab==4.4.*

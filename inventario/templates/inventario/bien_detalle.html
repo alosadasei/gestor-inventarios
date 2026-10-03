@@ -1,0 +1,67 @@
+{% extends "inventario/base.html" %}
+{# Ficha de un bien: datos, acciones (etiqueta, traslado, baja) e historial de movimientos. #}
+{% block titulo %}{{ bien.descripcion }}{% endblock %}
+{% block titulo_pagina %}{{ bien.descripcion }}{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'inventario:escaner' %}"><i class="bi bi-arrow-left"></i> Volver al escáner</a></p>
+
+<div class="app-card">
+    <div class="app-card-header">
+        <h2 class="app-card-title">Datos del bien</h2>
+        <span class="badge-estado badge-{{ bien.estado|lower }}">{{ bien.get_estado_display }}</span>
+    </div>
+
+    <table class="app-table">
+        <tbody>
+        <tr><td style="width:220px; color:var(--app-muted);">Bloque</td><td>{{ bien.get_bloque_display }}</td></tr>
+        <tr><td style="color:var(--app-muted);">Departamento</td><td>{{ bien.departamento }}</td></tr>
+        <tr><td style="color:var(--app-muted);">Ubicación</td><td>{{ bien.ubicacion }}</td></tr>
+        {% if bien.categoria %}<tr><td style="color:var(--app-muted);">Categoría</td><td>{{ bien.categoria }}</td></tr>{% endif %}
+        {% if bien.numero_activo_serie %}<tr><td style="color:var(--app-muted);">Nº activo/serie</td><td>{{ bien.numero_activo_serie }}</td></tr>{% endif %}
+        {% if bien.bloque == "EQUIPO_INFORMATICO" %}
+            <tr><td style="color:var(--app-muted);">CAUCE</td><td>{{ bien.es_cauce|yesno:"Sí,No" }}{% if bien.etiqueta_cauce %} ({{ bien.etiqueta_cauce }}){% endif %}</td></tr>
+            <tr><td style="color:var(--app-muted);">Tipo</td><td>{{ bien.get_tipo_equipo_display }}</td></tr>
+            {% if bien.uso %}<tr><td style="color:var(--app-muted);">Uso</td><td>{{ bien.get_uso_display }}</td></tr>{% endif %}
+        {% endif %}
+        {% if bien.etiqueta %}
+            <tr><td style="color:var(--app-muted);">Código interno</td><td>{{ bien.etiqueta.codigo_interno }}</td></tr>
+        {% endif %}
+        <tr><td style="color:var(--app-muted);">Fecha de alta</td><td>{{ bien.fecha_alta }}</td></tr>
+        </tbody>
+    </table>
+
+    <div class="d-flex gap-2 flex-wrap mt-3">
+        {% if bien.etiqueta %}
+            <a class="btn-app" href="{% url 'inventario:etiqueta_pdf_individual' bien.etiqueta.id %}" target="_blank">
+                <i class="bi bi-printer"></i> Reimprimir etiqueta
+            </a>
+        {% endif %}
+        {% if bien.estado != "BAJA" %}
+            <a class="btn-app-ghost" href="{% url 'inventario:traslado_bien' bien.pk %}"><i class="bi bi-arrow-left-right"></i> Trasladar</a>
+            {% if bien.tiene_baja_pendiente %}
+                <span class="badge-estado badge-en_reparacion" style="align-self:center;">Baja solicitada, pendiente de aprobación</span>
+            {% else %}
+                <a class="btn-app-danger" href="{% url 'inventario:solicitar_baja_bien' bien.pk %}"><i class="bi bi-trash3"></i> Solicitar baja</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="app-card mt-3">
+    <div class="app-card-header">
+        <h2 class="app-card-title">Historial</h2>
+    </div>
+    <table class="app-table">
+        <thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th></tr></thead>
+        <tbody>
+        {% for movimiento in bien.historial.all %}
+        <tr>
+            <td>{{ movimiento.fecha|date:"d/m/Y H:i" }}</td>
+            <td>{{ movimiento.get_tipo_display }}</td>
+            <td>{{ movimiento.usuario }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

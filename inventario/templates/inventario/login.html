@@ -1,0 +1,32 @@
+{% extends "inventario/auth_base.html" %}
+{# Primer paso del acceso: usuario y contraseña. #}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block auth_content %}
+    {% if form.errors %}
+    <div class="error-msg">
+        {% if form.non_field_errors %}
+            {{ form.non_field_errors|striptags }}
+        {% else %}
+            Usuario o contraseña incorrectos.
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label" for="id_username">Usuario</label>
+            {{ form.username }}
+        </div>
+        <div class="mb-4">
+            <label class="form-label" for="id_password">Contraseña</label>
+            {{ form.password }}
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn-login">Entrar</button>
+    </form>
+{% endblock %}
+{% block auth_footer %}
+    <a href="{% url 'password_reset' %}">¿Has olvidado tu contraseña?</a><br>
+    Acceso restringido al personal autorizado del centro.
+{% endblock %}

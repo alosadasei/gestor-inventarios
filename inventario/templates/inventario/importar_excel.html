@@ -1,0 +1,78 @@
+{% extends "inventario/base.html" %}
+{# Subida del Excel de inventario, con modo simulación, y resumen del resultado. #}
+{% block titulo %}Importar desde Excel{% endblock %}
+{% block nav_importar %}active{% endblock %}
+{% block titulo_pagina %}Importar desde Excel{% endblock %}
+{% block contenido %}
+<div class="app-card" style="max-width: 640px;">
+    <p style="color:var(--app-muted); margin-top:0;">
+        Sube un archivo con el mismo formato que la plantilla del centro: una hoja
+        por bloque (<strong>EQUIPOS INFORMÁTICOS</strong>, <strong>MAQUINARIA</strong>,
+        <strong>MOBILIARIO</strong>, <strong>UTILLAJE</strong>), con Departamento y
+        Ubicación en las dos primeras columnas.
+        {% if not es_administrador %}
+            Como no eres administrador, solo se importarán las filas de tu propio
+            departamento ({{ dpto_usuario }}); el resto se descartará con aviso.
+        {% endif %}
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="django-message error"><i class="bi bi-x-circle-fill"></i> {{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+        {% for field in form %}
+            <div class="mb-3 {% if field.name == 'dry_run' %}form-check{% endif %}">
+                {% if field.name == 'dry_run' %}
+                    {{ field }}
+                    <label class="form-check-label" for="{{ field.id_for_label }}" style="font-size:0.85rem; color:var(--app-text);">
+                        {{ field.label }}
+                    </label>
+                {% else %}
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                {% endif %}
+                {% if field.errors %}<div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>{% endif %}
+            </div>
+        {% endfor %}
+        <button class="btn-app" type="submit"><i class="bi bi-upload"></i> Importar</button>
+    </form>
+</div>
+
+{% if resultado %}
+<div class="app-card mt-3">
+    <div class="app-card-header">
+        <h2 class="app-card-title">
+            {% if form.cleaned_data.dry_run %}Resultado de la simulación{% else %}Resultado de la importación{% endif %}
+        </h2>
+    </div>
+    <table class="app-table">
+        <tbody>
+        <tr><td style="width:260px; color:var(--app-muted);">Equipos informáticos creados</td><td>{{ resultado.stats.EQUIPO_INFORMATICO|default:0 }}</td></tr>
+        <tr><td style="color:var(--app-muted);">Mobiliario creado</td><td>{{ resultado.stats.MOBILIARIO|default:0 }}</td></tr>
+        <tr><td style="color:var(--app-muted);">Maquinaria creada</td><td>{{ resultado.stats.MAQUINARIA|default:0 }}</td></tr>
+        <tr><td style="color:var(--app-muted);">Utillaje creado</td><td>{{ resultado.stats.UTILLAJE|default:0 }}</td></tr>
+        <tr><td style="color:var(--app-muted);">Filas omitidas</td><td>{{ resultado.stats.omitidas|default:0 }}</td></tr>
+        <tr><td style="color:var(--app-muted);">Errores de validación</td><td>{{ resultado.stats.errores|default:0 }}</td></tr>
+        </tbody>
+    </table>
+
+    {% if resultado.avisos %}
+        <h3 style="font-size:0.85rem; color:var(--app-heading); margin-top:1.25rem;">Avisos</h3>
+        <ul style="font-size:0.85rem; color:var(--app-muted);">
+            {% for aviso in resultado.avisos %}
+                <li>{{ aviso }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if form.cleaned_data.dry_run %}
+        <div class="django-message warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Esto ha sido una simulación: no se ha guardado nada. Desmarca "Solo simular" y vuelve a subir el archivo para confirmarlo.
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

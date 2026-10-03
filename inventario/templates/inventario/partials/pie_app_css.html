@@ -1,0 +1,54 @@
+{% comment %}
+Estilos del pie de página común (partials/pie_app.html). Se incluye dentro
+del <head> de cada plantilla raíz (base.html y login.html), que son las que
+definen los tokens --app-*. Para los tokens que no existen en las pantallas
+de acceso se indica un valor de respaldo.
+Usa la misma paleta oscura que el resto de plantillas.
+{% endcomment %}
+<style>
+  .pie-app {
+    margin: 2rem 2rem 1.25rem;
+    padding: 1.1rem 1.5rem;
+    background: var(--app-accent, #6d7cff);
+    color: var(--app-sidebar-text, #e6e9f0);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+  }
+
+  .pie-app-texto {
+    margin: 0;
+    opacity: 0.9;
+  }
+
+  .pie-app-enlaces {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .pie-app-enlaces a {
+    color: var(--app-gold-lt, #f0b955);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .pie-app-enlaces a:hover {
+    color: var(--app-sidebar-text, #e6e9f0);
+    text-decoration: underline;
+  }
+  .pie-app-separador { opacity: 0.5; }
+
+  @media (max-width: 768px) {
+    .pie-app {
+      margin: 1.5rem 1rem 1rem;
+      flex-direction: column;
+      text-align: center;
+    }
+    .pie-app-enlaces { flex-wrap: wrap; justify-content: center; }
+  }
+</style>

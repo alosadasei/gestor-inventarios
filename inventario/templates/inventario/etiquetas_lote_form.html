@@ -1,0 +1,59 @@
+{% extends "inventario/base.html" %}
+{# Formulario de filtros (departamento, ubicación, bloque) para generar el PDF de etiquetas. #}
+{% block titulo %}Imprimir etiquetas{% endblock %}
+{% block nav_etiquetas %}active{% endblock %}
+{% block titulo_pagina %}Imprimir etiquetas por lote{% endblock %}
+{% block contenido %}
+<div class="app-card" style="max-width: 520px;">
+    <form method="get" action="{% url 'inventario:etiquetas_pdf_lote' %}" target="_blank">
+        <div class="mb-3">
+            <label class="form-label" for="id_departamento">Departamento</label>
+            <select name="departamento" id="id_departamento" class="form-select">
+                <option value="">Todos</option>
+                {% for departamento in departamentos %}
+                <option value="{{ departamento.id }}">{{ departamento.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="id_ubicacion">Ubicación</label>
+            <select name="ubicacion" id="id_ubicacion" class="form-select">
+                <option value="">Todas las ubicaciones</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="id_bloque">Bloque de inmovilizado</label>
+            <select name="bloque" id="id_bloque" class="form-select">
+                <option value="">Todos</option>
+                <option value="EQUIPO_INFORMATICO">Equipos informáticos</option>
+                <option value="MOBILIARIO">Mobiliario</option>
+                <option value="MAQUINARIA">Maquinaria</option>
+                <option value="UTILLAJE">Utillaje</option>
+            </select>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" name="solo_pendientes" id="id_solo_pendientes" checked>
+            <label class="form-check-label" for="id_solo_pendientes" style="font-size:0.85rem; color:var(--app-text);">
+                Solo etiquetas aún no impresas
+            </label>
+        </div>
+        <button class="btn-app" type="submit"><i class="bi bi-printer"></i> Generar PDF</button>
+    </form>
+</div>
+
+<script>
+    // Al cambiar de departamento se piden al servidor sus ubicaciones y se
+    // sustituyen las opciones del desplegable de ubicación.
+    const selectDepartamento = document.getElementById('id_departamento');
+    const selectUbicacion = document.getElementById('id_ubicacion');
+
+    selectDepartamento.addEventListener('change', async () => {
+        if (!selectDepartamento.value) {
+            selectUbicacion.innerHTML = '<option value="">Todas las ubicaciones</option>';
+            return;
+        }
+        const resp = await fetch(`{% url 'inventario:ubicaciones_por_departamento' %}?departamento=${selectDepartamento.value}`);
+        selectUbicacion.innerHTML = await resp.text();
+    });
+</script>
+{% endblock %}

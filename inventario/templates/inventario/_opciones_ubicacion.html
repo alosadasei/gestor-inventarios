@@ -1,0 +1,5 @@
+{# Fragmento HTML con las <option> de ubicaciones de un departamento; lo devuelve el endpoint AJAX y lo inserta el JS de etiquetas_lote_form. #}
+<option value="">Todas las ubicaciones</option>
+{% for ubicacion in ubicaciones %}
+<option value="{{ ubicacion.id }}">{{ ubicacion.nombre }}</option>
+{% endfor %}

@@ -1,0 +1,29 @@
+{% extends "inventario/base.html" %}
+{# Listado, solo para administradores, de bienes con una baja solicitada pendiente de resolver. #}
+{% block titulo %}Bajas pendientes{% endblock %}
+{% block nav_bajas %}active{% endblock %}
+{% block titulo_pagina %}Bajas pendientes de aprobación{% endblock %}
+{% block contenido %}
+<div class="app-card">
+    {% if bienes %}
+    <table class="app-table">
+        <thead><tr><th>Bien</th><th>Departamento</th><th>Ubicación</th><th></th></tr></thead>
+        <tbody>
+        {% for bien in bienes %}
+        <tr>
+            <td>{{ bien.descripcion }}</td>
+            <td>{{ bien.departamento }}</td>
+            <td>{{ bien.ubicacion }}</td>
+            <td><a class="btn-app" href="{% url 'inventario:resolver_baja' bien.pk %}">Resolver</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="empty-state">
+            <i class="bi bi-clipboard-check"></i>
+            <p>No hay solicitudes de baja pendientes.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

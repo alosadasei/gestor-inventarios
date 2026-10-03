@@ -1,0 +1,35 @@
+{% extends "inventario/auth_base.html" %}
+{# Segundo paso del acceso: código de 6 dígitos recibido por correo. #}
+{% block titulo %}Verificación en dos pasos{% endblock %}
+{% block auth_content %}
+    <p style="font-size:0.85rem; color:var(--app-muted); margin-top:0;">
+        Te hemos enviado un código de 6 dígitos a <strong style="color:var(--app-text);">{{ email }}</strong>.
+        Introdúcelo para completar el acceso.
+    </p>
+
+    {% if reenviado %}
+        <div class="success-msg">Te hemos enviado un nuevo código.</div>
+    {% endif %}
+
+    {% if form.errors %}
+        <div class="error-msg">{{ form.codigo.errors|striptags }}</div>
+    {% endif %}
+
+    <form method="post" action="{% url 'verificar_codigo' %}">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label class="form-label" for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
+            {{ form.codigo }}
+            <div class="form-text">{{ form.codigo.help_text }}</div>
+        </div>
+        <button type="submit" class="btn-login">Verificar</button>
+    </form>
+
+    <form method="post" action="{% url 'reenviar_codigo' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-login-ghost">Reenviar código</button>
+    </form>
+{% endblock %}
+{% block auth_footer %}
+    <a href="{% url 'login' %}">Volver al inicio de sesión</a>
+{% endblock %}

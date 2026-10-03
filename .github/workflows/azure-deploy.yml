@@ -1,0 +1,55 @@
+name: Desplegar en Azure App Service
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: inventario-app      # ajustar al nombre real del App Service
+  AZURE_RESOURCE_GROUP: Inventario_RG   # ajustar al resource group real
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Crear el entorno virtual 'antenv' con las dependencias ya instaladas
+        run: |
+          python -m venv antenv
+          source antenv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python manage.py check
+
+      - name: Empaquetar la aplicación (incluye antenv/ con las dependencias)
+        run: |
+          zip -r release.zip . \
+            -x "*.git*" \
+            -x "db.sqlite3" \
+            -x "media/*" \
+            -x "staticfiles/*"
+
+      - name: Iniciar sesión en Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Desplegar en App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          resource-group-name: ${{ env.AZURE_RESOURCE_GROUP }}
+          package: release.zip
+
+      - name: Cerrar sesión en Azure
+        run: az logout
+        if: always()
